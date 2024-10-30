@@ -1,5 +1,11 @@
+from utils import config_init
+
 def main():
     # initialize configuration files
-    pass
+    config = config_init()
+    
+
+
+main()
 
 
