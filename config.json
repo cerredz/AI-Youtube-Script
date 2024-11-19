@@ -1,0 +1,18 @@
+{
+  "output_directory": "images/fantasies",
+  "model_options": {
+    "model": "black-forest-labs/FLUX.1-dev",
+    "num_inference_steps": "28",
+    "guidance_scale": "3.5",
+    "image": {
+      "width": "768",
+      "height": "1024"
+    }
+  },
+  "youtube_api": {
+    "video_title": "Nature",
+    "video_description": "Nature clips"
+  },
+  "hf_token": "",
+  "generate_images": "True"
+}
