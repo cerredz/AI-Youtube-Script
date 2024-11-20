@@ -12,6 +12,7 @@ def create_config():
                 "output_directory":"images/(____)",
                 "hf_token": "",
                 "generate_images": True,
+                "save_images": False,
                 "model_options": {
                     "model": "black-forest-labs/FLUX.1-dev",
                     "num_inference_steps": 28,
@@ -91,6 +92,11 @@ def validate_config():
         if "video_description" not in youtube_api or youtube_api["video_description"] == "":
             print("🔴 The YouTube video description is not set in the config file!")
             prompt_config("youtube_api.video_description")
+
+        if "save_images" not in config or (config["save_images"] != "True" and config["save_images"] != "False"):
+            print("🔴 The save images option is not set in the config file!")
+            prompt_config("save_images")
+
 
 
         # check if all the required keys are present

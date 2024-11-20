@@ -13,6 +13,7 @@
     "video_title": "Nature",
     "video_description": "Nature clips"
   },
-  "hf_token": "",
-  "generate_images": "True"
+  "hf_token": "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",
+  "generate_images": "False",
+  "save_images": "True"
 }

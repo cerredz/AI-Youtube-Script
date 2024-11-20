@@ -17,4 +17,6 @@ helpers/NordVPN.py
 *.tiff
 *.ico
 *.webp
+token.json
+
 
