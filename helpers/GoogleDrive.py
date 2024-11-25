@@ -35,19 +35,20 @@ def authenticate_google_drive():
                         "client_secret": client_secret,
                         "auth_uri": "https://accounts.google.com/o/oauth2/auth",
                         "token_uri": "https://oauth2.googleapis.com/token",
-                        "redirect_uris": ["http://localhost:3000"]
+                        "redirect_uris": ["http://localhost:8080"]
                     }
                 },
                 SCOPES
             )
-            creds = flow.run_local_server(port=0)
+            creds = flow.run_local_server(port=8080)
+            
+
         # Save the credentials for the next run
         with open('token.json', 'w') as token:
             token.write(creds.to_json())
 
     try:
         service = build("drive", "v3", credentials=creds)
-
         # Call the Drive v3 API
         results = (
             service.files()
