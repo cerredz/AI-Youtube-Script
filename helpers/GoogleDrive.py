@@ -4,6 +4,8 @@ from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
 from googleapiclient.errors import HttpError
+from googleapiclient.http import MediaFileUpload
+
 
 # authenticate the google drive api
 def authenticate_google_drive():
@@ -72,7 +74,7 @@ def get_images_folder(service):
             
         return all_images['files'][0]['id']
     except HttpError as error:
-        print(f"An error occurred: {error}")
+        print(f"Error Getting the root images folder: {error}")
         return None
     
 # Create the subfolder for the generated images to be saved
@@ -92,10 +94,38 @@ def create_subfolder(service, images_folder_id, subfolder_name):
         return subfolder.get('id')
     
     except HttpError as error:
-        print(f"An error occurred: {error}")
+        print(f"Error creating the subfolder: {error}")
+        return None
+    
+# save the generated images to the subfolder
+def save_images_to_subfolder(service, subfolder_id, images_paths):
+    try:
+        for image_path in images_paths:
+            file_name = os.path.basename(image_path)
+
+            # create file metadata
+            file_metadata = {
+                "name": file_name,
+                "parents": [subfolder_id]
+            }
+
+            # create the file
+            media = MediaFileUpload(image_path, mimetype="image/webp", resumable=True)
+
+            # upload the file
+            file = (
+                service.files()
+                .create(body=file_metadata, media_body=media, fields="id")
+                .execute()
+            )
+            print(f"🟢 Successfully Saved {file_name} to the google drive")
+
+
+    except HttpError as error:
+        print(f"Error saving the images to the subfolder: {error}")
         return None
 
-__all__ = ["authenticate_google_drive", "get_images_folder", "create_subfolder"]
+__all__ = ["authenticate_google_drive", "get_images_folder", "create_subfolder", "save_images_to_subfolder"]
 
     
     

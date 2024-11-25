@@ -1,4 +1,4 @@
-from helpers.GoogleDrive import authenticate_google_drive, get_images_folder
+from helpers.GoogleDrive import authenticate_google_drive, get_images_folder, create_subfolder, save_images_to_subfolder
 import os
 # save the images generated from the script
 def save_images_drive(config):
@@ -17,7 +17,8 @@ def save_images_drive(config):
     # create the subfolder for the current images paths
     subfolder_id = create_subfolder(service, images_folder_id, output_folder.split("/")[-1])
 
-    
+    # upload the images to the subfolder
+    save_images_to_subfolder(service, subfolder_id, images_paths)
 
 
 
