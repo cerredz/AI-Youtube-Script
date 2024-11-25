@@ -17,13 +17,11 @@ def authenticate_google_drive():
         print("🔴 INVALID GOOGLE CREDENTIALS")
         return
 
-    # Create credentials object directly from client ID and secret
-    creds = Credentials.from_authorized_user_info({
-        "client_id": client_id,
-        "client_secret": client_secret,
-        "scopes": SCOPES
-    }) if os.path.exists('token.json') else None
+    # First check if we have valid token stored
+    if os.path.exists('token.json'):
+        creds = Credentials.from_authorized_user_file('token.json', SCOPES)
 
+    # If there are no (valid) credentials available, let's create new ones
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
             creds.refresh(Request())
@@ -41,7 +39,6 @@ def authenticate_google_drive():
                 SCOPES
             )
             creds = flow.run_local_server(port=8080)
-            
 
         # Save the credentials for the next run
         with open('token.json', 'w') as token:
@@ -50,25 +47,55 @@ def authenticate_google_drive():
     try:
         service = build("drive", "v3", credentials=creds)
         # Call the Drive v3 API
-        results = (
-            service.files()
-            .list(pageSize=10, fields="nextPageToken, files(id, name)")
-            .execute() 
-        )
-        items = results.get("files", [])
-
-        if not items:
-            print("No files found.")
-            return
-        print("Files:")
-        for item in items:
-            print(f"{item['name']} ({item['id']})")
+        return service
     except HttpError as error:
         # TODO(developer) - Handle errors from drive API.
         print(f"An error occurred: {error}")
 
+# get the root images folder from the google drive
+def get_images_folder(service):
+    try:
+        # first, find the root "images" folder inside of the drive
+        all_images = service.files().list(
+            q="name='images' and mimeType='application/vnd.google-apps.folder' and trashed=false",
+            spaces="drive",
+            fields="files(id, name)"
+        ).execute()
 
-__all__ = ["authenticate_google_drive"]
+        # if the folder doesn't exist, create it
+        if not all_images.get("files"):
+            folder = service.files().create(
+                body={"name": "images", "mimeType": "application/vnd.google-apps.folder"},
+                fields="id"
+            ).execute()
+            return folder.get('id')
+            
+        return all_images['files'][0]['id']
+    except HttpError as error:
+        print(f"An error occurred: {error}")
+        return None
+    
+# Create the subfolder for the generated images to be saved
+def create_subfolder(service, images_folder_id, subfolder_name):
+    try:
+        # create the metadata for the subfolder
+        file_metadata = {
+            "name": subfolder_name,
+            "mimeType": "application/vnd.google-apps.folder",
+            "parents": [images_folder_id]
+        }
+
+        # create the subfolder
+        subfolder = service.files().create(body=file_metadata, fields="id").execute()
+
+        # return the subfolder id to use it later
+        return subfolder.get('id')
+    
+    except HttpError as error:
+        print(f"An error occurred: {error}")
+        return None
+
+__all__ = ["authenticate_google_drive", "get_images_folder", "create_subfolder"]
 
     
     
